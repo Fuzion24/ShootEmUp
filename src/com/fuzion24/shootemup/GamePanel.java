@@ -6,6 +6,7 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -38,15 +39,10 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 		mThread = new GameThread(this);
 	}
 	
-	public void doDraw(Canvas canvas) {
+	public void doDraw(long elapsed, Canvas canvas) {
 	    canvas.drawColor(Color.WHITE);
-	    mCrossHairs.drawCrossHairs(canvas);
-	    synchronized(mBulletHoles){
-		    for(BulletHoleSprite bulletHole : mBulletHoles)
-		    {
-		    	bulletHole.drawBulletHole(canvas);
-		    }
-	    }
+	   
+
 	    synchronized(mCowBoys)
 	    {
 		    for(CowBoySprite cbs : mCowBoys)
@@ -54,6 +50,15 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 		    	cbs.drawCowboy(canvas);
 		    }
 	    }
+	    synchronized(mBulletHoles){
+		    for(BulletHoleSprite bulletHole : mBulletHoles)
+		    {
+		    	bulletHole.drawBulletHole(canvas);
+		    }
+	    }
+	    mCrossHairs.drawCrossHairs(canvas);
+	    canvas.drawText("FPS: " + Math.round(1000f / elapsed) + " Elements: " + mCowBoys.size(), 10, 10, new Paint());
+
 	}
 	
 	public void animateCowBoys(long elapsedTime) {
