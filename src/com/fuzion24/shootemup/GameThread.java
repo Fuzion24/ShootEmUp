@@ -4,13 +4,14 @@ import android.graphics.Canvas;
 import android.view.SurfaceHolder;
 
 public class GameThread extends Thread{
-	   private GamePanel mPanel;
+	   private GamePanel mGamePanel;
 	    private SurfaceHolder mHolder;
 	    private boolean mRun = false;
-	 
+	    private long mStartTime;
+	    private long mElapsed;
 	    public GameThread(GamePanel panel) {
-	        mPanel = panel;
-	        mHolder = mPanel.getHolder();
+	    	mGamePanel = panel;
+	        mHolder = mGamePanel.getHolder();
 	    }
 	 
 	    public void setRunning(boolean run) {
@@ -23,9 +24,12 @@ public class GameThread extends Thread{
 	        while (mRun) {
 	            canvas = mHolder.lockCanvas();
 	            if (canvas != null) {
-	                mPanel.doDraw(canvas);
+	            	mGamePanel.animateCowBoys(mElapsed);
+	            	mGamePanel.doDraw(canvas);
+	            	mElapsed = System.currentTimeMillis() - mStartTime;
 	                mHolder.unlockCanvasAndPost(canvas);
 	            }
+	            mStartTime = System.currentTimeMillis();
 	        }
 	    }
 }

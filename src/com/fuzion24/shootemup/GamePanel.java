@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -14,15 +13,27 @@ import android.view.SurfaceView;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	
+	public static float mWidth;
+	public static float mHeight;
+	private final int NUM_OF_COWBOYS = 5;
+	
 	GameThread mThread;
 	CrossHairSprite mCrossHairs;
 	List<BulletHoleSprite> mBulletHoles;
-	
+	List<CowBoySprite> mCowBoys;
+
 	
 	public GamePanel(Context context) {
 		super(context);
 		mCrossHairs = new CrossHairSprite(getResources());
 		mBulletHoles = new ArrayList<BulletHoleSprite>();
+		mCowBoys = new ArrayList<CowBoySprite>();
+		
+		for(int i = 0; i < NUM_OF_COWBOYS; i++)
+		{
+			CowBoySprite newCowBoy = new CowBoySprite(getResources());
+			mCowBoys.add(newCowBoy);
+		}
 		getHolder().addCallback(this);
 		mThread = new GameThread(this);
 	}
@@ -36,8 +47,22 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 		    	bulletHole.drawBulletHole(canvas);
 		    }
 	    }
+	    synchronized(mCowBoys)
+	    {
+		    for(CowBoySprite cbs : mCowBoys)
+		    {
+		    	cbs.drawCowboy(canvas);
+		    }
+	    }
 	}
 	
+	public void animateCowBoys(long elapsedTime) {
+	    synchronized (mCowBoys) {
+	        for (CowBoySprite cbs : mCowBoys) {
+	        	cbs.animate(elapsedTime);
+	        }
+	    }
+	}
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		//Log.d("MultiTouchDebug", String.valueOf(event.getPointerId(1)));
@@ -72,7 +97,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int width,
 			int height) {
-		// TODO Auto-generated method stub
-		
+	    mWidth = width;
+	    mHeight = height;
 	}
 }
