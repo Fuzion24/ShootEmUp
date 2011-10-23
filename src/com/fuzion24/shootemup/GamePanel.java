@@ -3,6 +3,10 @@ package com.fuzion24.shootemup;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fuzion24.shootemup.sprites.BulletHoleSprite;
+import com.fuzion24.shootemup.sprites.CowBoySprite;
+import com.fuzion24.shootemup.sprites.CrossHairSprite;
+
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -86,10 +90,9 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 			  {
 				  boolean cowBoyWasKilled = cowBoy.wasShot(xPos, yPos);
 				  if(cowBoyWasKilled)
-				  {
-					  mCowBoys.remove(cowBoy);
+				  {					 
+					  mBulletHoles.remove(newBulletHole);
 					  break;
-					  //TODO: Show BloodSprite
 				  }
 			  }
 			}
@@ -118,5 +121,18 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 			int height) {
 	    mWidth = width;
 	    mHeight = height;
+	}
+
+	public void removeDeadCowboys() {
+		synchronized(mCowBoys){
+			  for(int i = 0; i < mCowBoys.size(); i++)
+			  {
+				  CowBoySprite cowBoy = mCowBoys.get(i);
+				  if(cowBoy.removeCowBoy)
+				  {					 
+					  mCowBoys.remove(cowBoy);
+				  }
+			  }
+			}
 	}
 }
