@@ -24,6 +24,7 @@ public class GameThread extends Thread{
 	        while (mRun) {
 	            canvas = mHolder.lockCanvas();
 	            if (canvas != null) {
+	            	
 	            	mGamePanel.animateCowBoys(mElapsed);
 	            	mGamePanel.doDraw(mElapsed, canvas);
 	            	mElapsed = System.currentTimeMillis() - mStartTime;

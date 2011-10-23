@@ -47,6 +47,18 @@ public class CowBoySprite {
 	    mY += mSpeedY * (elapsedTime / 20f);
 	    checkBorders();
 	}
+	public boolean wasShot(int x, int y)
+	{
+		int lowWidth = (int) mX;
+		int highWidth = (int) (mX + mCurrentBitmap.getWidth());
+		int lowHeight = (int) mY;
+		int highHeight = (int) mY + mCurrentBitmap.getHeight();
+		if (x >= lowWidth && x <= highWidth && y >= lowHeight && y <= highHeight)
+		{
+			return true;
+		}
+		return false;
+	}
 	private void checkBorders() {
 	    if (mX <= 0) {
 	        mSpeedX = -mSpeedX;

@@ -49,6 +49,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 		    {
 		    	cbs.drawCowboy(canvas);
 		    }
+		    canvas.drawText("FPS: " + Math.round(1000f / elapsed) + " Elements: " + mCowBoys.size(), 10, 10, new Paint());
 	    }
 	    synchronized(mBulletHoles){
 		    for(BulletHoleSprite bulletHole : mBulletHoles)
@@ -57,7 +58,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 		    }
 	    }
 	    mCrossHairs.drawCrossHairs(canvas);
-	    canvas.drawText("FPS: " + Math.round(1000f / elapsed) + " Elements: " + mCowBoys.size(), 10, 10, new Paint());
+	    
 
 	}
 	
@@ -70,14 +71,27 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	}
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		//Log.d("MultiTouchDebug", String.valueOf(event.getPointerId(1)));
-		
 		switch(event.getAction()){
 		case MotionEvent.ACTION_POINTER_2_DOWN:
 			BulletHoleSprite newBulletHole = new BulletHoleSprite(getResources());
-			newBulletHole.setBulletHole((int)event.getX(), (int)event.getY());
+			int xPos = (int)event.getX();
+			int yPos = (int)event.getY();
+			newBulletHole.setBulletHole(xPos,yPos);
 			synchronized(mBulletHoles){
 			  mBulletHoles.add(newBulletHole);
+			}
+			synchronized(mCowBoys){
+				
+			  for(CowBoySprite cowBoy: mCowBoys)
+			  {
+				  boolean cowBoyWasKilled = cowBoy.wasShot(xPos, yPos);
+				  if(cowBoyWasKilled)
+				  {
+					  mCowBoys.remove(cowBoy);
+					  break;
+					  //TODO: Show BloodSprite
+				  }
+			  }
 			}
 		default: 
 			mCrossHairs.moveCrossHairs((int)event.getX(), (int) event.getY());
