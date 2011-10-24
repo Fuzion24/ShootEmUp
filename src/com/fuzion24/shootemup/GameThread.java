@@ -24,6 +24,7 @@ public class GameThread extends Thread{
 	        while (mRun) {
 	            canvas = mHolder.lockCanvas();
 	            if (canvas != null) {
+	            	//TODO: Dont do this everytime
 	            	mGamePanel.animateCowBoys(mElapsed);
 	            	mGamePanel.removeDeadCowboys();
 	            	mGamePanel.doDraw(mElapsed, canvas);

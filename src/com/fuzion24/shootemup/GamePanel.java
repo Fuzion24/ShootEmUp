@@ -18,8 +18,8 @@ import android.view.SurfaceView;
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	
-	public static float mWidth;
-	public static float mHeight;
+	public static int mWidth;
+	public static int mHeight;
 	private final int NUM_OF_COWBOYS = 5;
 	
 	GameThread mThread;
@@ -34,19 +34,22 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 		mBulletHoles = new ArrayList<BulletHoleSprite>();
 		mCowBoys = new ArrayList<CowBoySprite>();
 		
-		for(int i = 0; i < NUM_OF_COWBOYS; i++)
-		{
-			CowBoySprite newCowBoy = new CowBoySprite(getResources());
-			mCowBoys.add(newCowBoy);
-		}
+		synchronized(mCowBoys)
+	    {
+			for(int i = 0; i < NUM_OF_COWBOYS; i++)
+			{
+				CowBoySprite newCowBoy = new CowBoySprite(getResources());
+				mCowBoys.add(newCowBoy);
+			}
+	    }
+		
 		getHolder().addCallback(this);
 		mThread = new GameThread(this);
 	}
 	
 	public void doDraw(long elapsed, Canvas canvas) {
 	    canvas.drawColor(Color.WHITE);
-	   
-
+	  
 	    synchronized(mCowBoys)
 	    {
 		    for(CowBoySprite cbs : mCowBoys)

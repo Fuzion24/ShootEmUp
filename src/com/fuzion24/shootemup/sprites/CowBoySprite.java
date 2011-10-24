@@ -22,13 +22,25 @@ public class CowBoySprite {
 	int mBloodPuddleScale = 1;
 	private Bitmap mBloodPuddle;
 	private Bitmap mCurrentBloodPuddle;
-	private boolean mKilled = false;
 	public boolean removeCowBoy = false;
 	
-	enum SPEED{
-		SLOW,
-		MEDIUM,
-		FAST
+	private int mSpeed = CowBoySpeed.SLOW;
+	
+	private CowBoyState mCurrentState = CowBoyState.stopped;
+	private long mStateTime = 0;
+	private long mLongestStateTime = 0;
+	
+	private static class CowBoySpeed{
+		public static final int SLOW = 2;
+		public static final int MEDIUM = 3;
+		public static final int FAST = 5;
+	}
+	
+	enum CowBoyState{
+		walking,
+		stopped,
+		shooting,
+		dead
 	}
 	
 	public CowBoySprite(Resources res) {
@@ -36,22 +48,69 @@ public class CowBoySprite {
 		mCurrentCowBoy = mOrigCowBoy = BitmapFactory.decodeResource(res, R.raw.cowboy);
 		mCurrentBloodPuddle = mBloodPuddle = BitmapFactory.decodeResource(res, R.raw.bloodpuddle);
 		mCurrentCowBoy = scaleBitmap(mOrigCowBoy, (float).6,(float).6,0);
-		mX = 0;
-		mY = 0;
-	    mSpeedX = rand.nextInt(7) - 2 - rand.nextFloat();
-	    mSpeedY = rand.nextInt(7) - 2 - rand.nextFloat();
+		
+		//Randomly select their starting position
+		mX = rand.nextInt(800);
+		mY = rand.nextInt(800);
+		
+		//Randomly select their speed
+		switch(rand.nextInt(3)){
+		case 1: 
+			mSpeed = CowBoySpeed.SLOW;
+		case 2: 
+		    mSpeed = CowBoySpeed.MEDIUM;
+		case 3: 
+		    mSpeed = CowBoySpeed.FAST;
+		default:
+			mSpeed = CowBoySpeed.MEDIUM;
+		}
+	    changeDirection();
+	    int max = 10000;
+	    int min = 2000;
+	    mLongestStateTime = rand.nextInt(max - min + 1) + min;
 	}
 
+	private void changeDirection()
+	{
+		Random rand = new Random();
+		boolean negativeX = rand.nextInt(1) == 0 ? true : false;
+		boolean negativeY = rand.nextInt(1) == 0 ? true : false;
+		//Make them prefer to not move diagonally
+		boolean diagonally = rand.nextInt(10) < 4 ? true : false;
+		
+		if(diagonally)
+		{
+			mSpeedX = rand.nextInt(mSpeed);
+			mSpeedY = rand.nextInt(mSpeed);
+		}else
+		{
+			//Randomly choose to zero out x-speed or y-speed
+			boolean zeroxspeed = rand.nextInt(1) == 0 ? true : false;
+			if(zeroxspeed)
+			{
+				mSpeedX = 0;
+				mSpeedY = rand.nextInt(mSpeed);
+			}else
+			{
+				mSpeedY = 0;
+				mSpeedX = rand.nextInt(mSpeed);
+			}
+		}
+		
+		if(negativeX)
+			mSpeedX = -mSpeedX;
+		if(negativeY)
+			mSpeedY = -mSpeedY;
+	}
 	public void drawCowboy(Canvas canvas) {
-		//TODO: The cowboy should never get bigger than 100%
 		/*Scale the cowboy based on the depth*/
-	/*	
-	   float scaleFactor = GamePanel.mHeight / (GamePanel.mHeight - mY);
-		if(scaleFactor > 0)
-			mCurrentBitmap = scaleCowboy(scaleFactor,scaleFactor);
-	*/
-			
-		if(mKilled)
+	   float scaleFactor = mY / GamePanel.mHeight;
+	   //Set scalefactor to a number between .4f and .7f based on the percentage away from the user the indian is.
+	   scaleFactor = scaleFactor * (.7f-.4f) + .4f;
+
+	   //TODO: scale blood pile based on depth, too .. 
+	   //Cowboys further away bleed more?! :P
+		if(mCurrentState == CowBoyState.dead)
 		{
 			//Show Blood Puddle
 			if(mBloodPuddleScale < 100)
@@ -63,8 +122,11 @@ public class CowBoySprite {
 				removeCowBoy = true;
 			}
 			canvas.drawBitmap(mCurrentBloodPuddle, mX,mY, null);
+			 mCurrentCowBoy = scaleBitmap(mOrigCowBoy,scaleFactor,scaleFactor,90);
+		}else
+		{
+			 mCurrentCowBoy = scaleBitmap(mOrigCowBoy,scaleFactor,scaleFactor,0);
 		}
-			
 		canvas.drawBitmap(mCurrentCowBoy, mX, mY, null);
 	}
 	
@@ -78,9 +140,31 @@ public class CowBoySprite {
 		return Bitmap.createBitmap(bitmap, 0, 0,width,height,matrix,true);
 	}
 	public void animate(long elapsedTime) {
-	    mX += mSpeedX * (elapsedTime / 20f);
-	    mY += mSpeedY * (elapsedTime / 20f);
-	    checkBorders();
+		mStateTime += elapsedTime;
+		
+		if (mCurrentState == CowBoyState.walking)
+		{
+			if(mStateTime > mLongestStateTime)
+			{
+				mCurrentState = CowBoyState.stopped;
+				mStateTime = 0;
+				return;
+			}
+	
+			mX += mSpeedX * (elapsedTime / 20f);
+			mY += mSpeedY * (elapsedTime / 20f);
+			checkBorders();
+		}else if (mCurrentState == CowBoyState.stopped)
+		{
+			//TODO: Change direction of the Cowboy
+			if(mStateTime > mLongestStateTime*.75)
+			{
+				changeDirection();
+				mCurrentState = CowBoyState.walking;
+				mStateTime = 0;
+			}
+			
+		}
 	}
 	
 	public boolean wasShot(int x, int y)
@@ -95,7 +179,7 @@ public class CowBoySprite {
 			mCurrentCowBoy = scaleBitmap(mOrigCowBoy, (float).6,(float).6,90);
 			mSpeedX = mSpeedY = 0; //He's no longer moving
 			mCurrentBloodPuddle = scaleBitmap(mBloodPuddle,(float).01,(float).01,0);
-			mKilled = true;
+			mCurrentState = CowBoyState.dead;
 			return true;
 		}
 		return false;
