@@ -8,20 +8,23 @@ import com.fuzion24.shootemup.sprites.CowBoySprite;
 import com.fuzion24.shootemup.sprites.CrossHairSprite;
 
 import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 
 public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
-	
 	public static int mWidth;
 	public static int mHeight;
 	private final int NUM_OF_COWBOYS = 5;
 	
+	BitmapDrawable mBackground;
 	GameThread mThread;
 	CrossHairSprite mCrossHairs;
 	List<BulletHoleSprite> mBulletHoles;
@@ -30,6 +33,8 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	
 	public GamePanel(Context context) {
 		super(context);
+	
+		mBackground = new BitmapDrawable(BitmapFactory.decodeResource(getResources(),R.raw.background));
 		mCrossHairs = new CrossHairSprite(getResources());
 		mBulletHoles = new ArrayList<BulletHoleSprite>();
 		mCowBoys = new ArrayList<CowBoySprite>();
@@ -48,8 +53,15 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	}
 	
 	public void doDraw(long elapsed, Canvas canvas) {
-	    canvas.drawColor(Color.WHITE);
-	  
+		// Create a rectangle (just holds top/bottom/left/right info)
+	    Rect drawRect = new Rect(); 
+	    // Populate the rectangle that we just created with the drawing area of the canvas.
+	    canvas.getClipBounds(drawRect);
+	    // Make the height of the background drawing area equal to the height of the background bitmap
+	    drawRect.bottom = drawRect.top + mBackground.getBitmap().getHeight();
+	    // Set the drawing area for the background.
+	    mBackground.setBounds(drawRect);
+	    mBackground.draw(canvas);
 	    synchronized(mCowBoys)
 	    {
 		    for(CowBoySprite cbs : mCowBoys)
@@ -107,6 +119,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	}
 	
 	public void surfaceCreated(SurfaceHolder holder) {
+		
 	    if (!mThread.isAlive()) {
 	        mThread = new GameThread(this);
 	        mThread.setRunning(true);
