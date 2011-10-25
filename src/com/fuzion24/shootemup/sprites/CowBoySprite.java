@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Matrix;
 
 public class CowBoySprite {
@@ -64,6 +65,7 @@ public class CowBoySprite {
 		default:
 			mSpeed = CowBoySpeed.MEDIUM;
 		}
+		
 	    changeDirection();
 	    int max = 10000;
 	    int min = 2000;
@@ -101,6 +103,7 @@ public class CowBoySprite {
 			mSpeedX = -mSpeedX;
 		if(negativeY)
 			mSpeedY = -mSpeedY;
+		
 	}
 	public void drawCowboy(Canvas canvas) {
 		/*Scale the cowboy based on the depth*/
@@ -175,15 +178,30 @@ public class CowBoySprite {
 		int highHeight = (int) mY + mCurrentCowBoy.getHeight();
 		if (x >= lowWidth && x <= highWidth && y >= lowHeight && y <= highHeight)
 		{
+			if(pixelPerfectCollision(mCurrentCowBoy, x,y))
+			{
 			//Lay the cowboy down
 			mCurrentCowBoy = scaleBitmap(mOrigCowBoy, (float).6,(float).6,90);
 			mSpeedX = mSpeedY = 0; //He's no longer moving
 			mCurrentBloodPuddle = scaleBitmap(mBloodPuddle,(float).01,(float).01,0);
 			mCurrentState = CowBoyState.dead;
 			return true;
+			}
 		}
 		return false;
 	}
+	
+	private boolean pixelPerfectCollision(Bitmap bitmap, int x, int y)
+	{
+		//Log.w("PIXELPERFECT", "X:"+ String.valueOf(x) + " y:" + String.valueOf(y) + " mX:" + String.valueOf(mX) + " mY" + String.valueOf(mY));
+		x = (int) (x - mX);
+		y = (int) (y - mY);
+		if (x >= bitmap.getWidth() || y >= bitmap.getHeight())
+			return false;
+		else
+			return bitmap.getPixel(x, y) != Color.TRANSPARENT;
+	}
+	
 	private void checkBorders() {
 	    if (mX <= 0) {
 	        mSpeedX = -mSpeedX;
@@ -199,6 +217,10 @@ public class CowBoySprite {
 	    if (mY + mCurrentCowBoy.getHeight() >= GamePanel.mHeight) {
 	        mSpeedY = -mSpeedY;
 	        mY = GamePanel.mHeight - mCurrentCowBoy.getHeight();
+	    }
+	    if(mY + mCurrentCowBoy.getHeight() < 100){
+	    	mSpeedY = -mSpeedY;
+	    	mY = 100 - mCurrentCowBoy.getHeight();
 	    }
 	}
 }
