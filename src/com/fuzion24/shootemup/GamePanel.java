@@ -1,6 +1,7 @@
 package com.fuzion24.shootemup;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.fuzion24.shootemup.sprites.BulletHoleSprite;
@@ -63,6 +64,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	    mBackground.draw(canvas);
 	    synchronized(mCowBoys)
 	    {
+	    	
 		    for(CowBoySprite cbs : mCowBoys)
 		    {
 		    	cbs.drawCowboy(canvas);
@@ -82,6 +84,7 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback{
 	
 	public void animateCowBoys(long elapsedTime) {
 	    synchronized (mCowBoys) {
+	    	Collections.sort(mCowBoys);
 	        for (CowBoySprite cbs : mCowBoys) {
 	        	cbs.animate(elapsedTime);
 	        }

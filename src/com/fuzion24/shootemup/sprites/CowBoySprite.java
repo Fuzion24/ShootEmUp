@@ -12,9 +12,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 
-public class CowBoySprite {
+public class CowBoySprite implements Comparable<CowBoySprite>{
 	private float mX = -1;
-	private float mY = -1;
+	public  float mY = -1;
 	private float mSpeedX;
 	private float mSpeedY;
 	private Bitmap mOrigCowBoy;
@@ -31,7 +31,7 @@ public class CowBoySprite {
 	private long mStateTime = 0;
 	private long mLongestStateTime = 0;
 	
-	private static class CowBoySpeed{
+	private static class CowBoySpeed {
 		public static final int SLOW = 2;
 		public static final int MEDIUM = 3;
 		public static final int FAST = 5;
@@ -193,7 +193,6 @@ public class CowBoySprite {
 	
 	private boolean pixelPerfectCollision(Bitmap bitmap, int x, int y)
 	{
-		//Log.w("PIXELPERFECT", "X:"+ String.valueOf(x) + " y:" + String.valueOf(y) + " mX:" + String.valueOf(mX) + " mY" + String.valueOf(mY));
 		x = (int) (x - mX);
 		y = (int) (y - mY);
 		if (x >= bitmap.getWidth() || y >= bitmap.getHeight())
@@ -201,7 +200,7 @@ public class CowBoySprite {
 		else
 			return bitmap.getPixel(x, y) != Color.TRANSPARENT;
 	}
-	
+
 	private void checkBorders() {
 	    if (mX <= 0) {
 	        mSpeedX = -mSpeedX;
@@ -222,5 +221,9 @@ public class CowBoySprite {
 	    	mSpeedY = -mSpeedY;
 	    	mY = 100 - mCurrentCowBoy.getHeight();
 	    }
+	}
+
+	public int compareTo(CowBoySprite cbs) {
+		return (int) (this.mY - cbs.mY);
 	}
 }
